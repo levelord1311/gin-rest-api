@@ -2,5 +2,5 @@ package storage
 
 type User struct {
 	ID   string `json:"id"`
-	Name string `json:"name"`
+	Name string `json:"name" binding:"required"`
 }

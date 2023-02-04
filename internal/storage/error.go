@@ -1,7 +1,8 @@
 package storage
 
 const (
-	ErrNotFound Error = "object not found"
+	ErrNotFound      Error = "object not found"
+	ErrAlreadyExists Error = "such user already exists"
 )
 
 type Error string
