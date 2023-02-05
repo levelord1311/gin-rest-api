@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"gin-rest-api/internal/service"
 	"gin-rest-api/internal/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -11,11 +12,13 @@ import (
 	"testing"
 )
 
-type MockService struct {
+var _ service.Service = &mockService{}
+
+type mockService struct {
 	users map[string]storage.User
 }
 
-func (s *MockService) GetUser(id string) (*storage.User, error) {
+func (s *mockService) GetUser(id string) (*storage.User, error) {
 	var err error
 	user, ok := s.users[id]
 	if !ok {
@@ -24,7 +27,7 @@ func (s *MockService) GetUser(id string) (*storage.User, error) {
 	return &user, err
 }
 
-func (s *MockService) CreateUser(name string) (string, error) {
+func (s *mockService) CreateUser(name string) (string, error) {
 	if _, ok := s.users[name]; ok {
 		return "", storage.ErrAlreadyExists
 	}
@@ -50,7 +53,7 @@ func TestGetUser(t *testing.T) {
 		},
 	}
 
-	service := &MockService{users: store}
+	service := &mockService{users: store}
 	h := &Handler{
 		service,
 	}
@@ -114,12 +117,12 @@ func TestCreateUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	store := map[string]storage.User{
-		"Turkish": storage.User{
+		"Turkish": {
 			ID:   "1",
 			Name: "Turkish",
 		},
 	}
-	service := &MockService{users: store}
+	service := &mockService{users: store}
 	h := Handler{service: service}
 
 	cases := []struct {
@@ -131,6 +134,14 @@ func TestCreateUser(t *testing.T) {
 			"create new user",
 			storage.User{
 				Name: "Boris",
+			},
+
+			http.StatusCreated,
+		},
+		{
+			"create another user",
+			storage.User{
+				Name: "Tommy",
 			},
 
 			http.StatusCreated,
