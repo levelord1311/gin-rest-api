@@ -1,4 +1,4 @@
-package storage
+package apperror
 
 const (
 	ErrNotFound      Error = "object not found"

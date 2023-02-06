@@ -1,14 +1,16 @@
 package service
 
-import "gin-rest-api/internal/storage"
+import (
+	"gin-rest-api/internal/model"
+)
 
-type Service interface {
-	CreateUser(name string) (string, error)
-	GetUser(id string) (*storage.User, error)
+type Storage interface {
+	Create(name string) (string, error)
+	FindById(id string) (*model.User, error)
 }
 
 type userService struct {
-	storage storage.Storage
+	storage Storage
 }
 
 func (u *userService) CreateUser(name string) (string, error) {
@@ -19,7 +21,7 @@ func (u *userService) CreateUser(name string) (string, error) {
 	return createdID, nil
 }
 
-func (u *userService) GetUser(id string) (*storage.User, error) {
+func (u *userService) GetUser(id string) (*model.User, error) {
 	user, err := u.storage.FindById(id)
 
 	return user, err

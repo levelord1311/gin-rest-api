@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	"gin-rest-api/internal/service"
-	"gin-rest-api/internal/storage"
+	"gin-rest-api/internal/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -12,7 +11,12 @@ const (
 )
 
 type Handler struct {
-	service service.Service
+	service Service
+}
+
+type Service interface {
+	CreateUser(name string) (string, error)
+	GetUser(id string) (*model.User, error)
 }
 
 func (h *Handler) Register(router *gin.Engine) {
@@ -36,7 +40,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 
 func (h *Handler) CreateUser(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
-	user := &storage.User{}
+	user := &model.User{}
 	if err := c.BindJSON(user); err != nil {
 		sendErrBadRequest(c, err)
 		return

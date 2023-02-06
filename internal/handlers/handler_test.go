@@ -3,8 +3,8 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"gin-rest-api/internal/service"
-	"gin-rest-api/internal/storage"
+	"gin-rest-api/internal/apperror"
+	"gin-rest-api/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -12,27 +12,27 @@ import (
 	"testing"
 )
 
-var _ service.Service = &mockService{}
+var _ Service = &mockService{}
 
 type mockService struct {
-	users map[string]storage.User
+	users map[string]model.User
 }
 
-func (s *mockService) GetUser(id string) (*storage.User, error) {
+func (s *mockService) GetUser(id string) (*model.User, error) {
 	var err error
 	user, ok := s.users[id]
 	if !ok {
-		err = storage.ErrNotFound
+		err = apperror.ErrNotFound
 	}
 	return &user, err
 }
 
 func (s *mockService) CreateUser(name string) (string, error) {
 	if _, ok := s.users[name]; ok {
-		return "", storage.ErrAlreadyExists
+		return "", apperror.ErrAlreadyExists
 	}
 	id := "2"
-	s.users[id] = storage.User{
+	s.users[id] = model.User{
 		ID:   id,
 		Name: name,
 	}
@@ -42,7 +42,7 @@ func (s *mockService) CreateUser(name string) (string, error) {
 func TestGetUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	store := map[string]storage.User{
+	store := map[string]model.User{
 		"1": {
 			ID:   "1",
 			Name: "Boris",
@@ -61,13 +61,13 @@ func TestGetUser(t *testing.T) {
 	cases := []struct {
 		name   string
 		sendID string
-		want   storage.User
+		want   model.User
 		code   int
 	}{
 		{
 			name:   "Get existing user",
 			sendID: "1",
-			want: storage.User{
+			want: model.User{
 				ID:   "1",
 				Name: "Boris",
 			},
@@ -76,7 +76,7 @@ func TestGetUser(t *testing.T) {
 		{
 			name:   "Get another existing user",
 			sendID: "2",
-			want: storage.User{
+			want: model.User{
 				ID:   "2",
 				Name: "Tommy",
 			},
@@ -85,7 +85,7 @@ func TestGetUser(t *testing.T) {
 		{
 			name:   "Get user with non-existing ID",
 			sendID: "3",
-			want:   storage.User{},
+			want:   model.User{},
 			code:   http.StatusNotFound,
 		},
 	}
@@ -105,7 +105,7 @@ func TestGetUser(t *testing.T) {
 
 			assert.Equal(t, test.code, w.Code)
 
-			got := storage.User{}
+			got := model.User{}
 			json.Unmarshal(w.Body.Bytes(), &got)
 
 			assert.Equal(t, test.want, got)
@@ -116,7 +116,7 @@ func TestGetUser(t *testing.T) {
 func TestCreateUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	store := map[string]storage.User{
+	store := map[string]model.User{
 		"Turkish": {
 			ID:   "1",
 			Name: "Turkish",
@@ -127,12 +127,12 @@ func TestCreateUser(t *testing.T) {
 
 	cases := []struct {
 		name     string
-		postData storage.User
+		postData model.User
 		code     int
 	}{
 		{
 			"create new user",
-			storage.User{
+			model.User{
 				Name: "Boris",
 			},
 
@@ -140,7 +140,7 @@ func TestCreateUser(t *testing.T) {
 		},
 		{
 			"create another user",
-			storage.User{
+			model.User{
 				Name: "Tommy",
 			},
 
@@ -148,12 +148,12 @@ func TestCreateUser(t *testing.T) {
 		},
 		{
 			"send empty user data",
-			storage.User{},
+			model.User{},
 			http.StatusBadRequest,
 		},
 		{
 			"user already exists",
-			storage.User{
+			model.User{
 				Name: "Turkish",
 			},
 			http.StatusBadRequest,
