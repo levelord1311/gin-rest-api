@@ -3,7 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"gin-rest-api/internal/apperror"
+	"fmt"
 	"gin-rest-api/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -22,14 +22,14 @@ func (s *mockService) GetUser(id string) (*model.User, error) {
 	var err error
 	user, ok := s.users[id]
 	if !ok {
-		err = apperror.ErrNotFound
+		err = fmt.Errorf("not found")
 	}
 	return &user, err
 }
 
 func (s *mockService) CreateUser(name string) (string, error) {
 	if _, ok := s.users[name]; ok {
-		return "", apperror.ErrAlreadyExists
+		return "", fmt.Errorf("already exists")
 	}
 	id := "2"
 	s.users[id] = model.User{

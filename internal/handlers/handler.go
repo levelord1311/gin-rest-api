@@ -10,13 +10,13 @@ const (
 	userPath = "/user"
 )
 
-type Handler struct {
-	service Service
-}
-
 type Service interface {
 	CreateUser(name string) (string, error)
 	GetUser(id string) (*model.User, error)
+}
+
+type Handler struct {
+	service Service
 }
 
 func (h *Handler) Register(router *gin.Engine) {

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"gin-rest-api/internal/apperror"
+	"fmt"
 	"gin-rest-api/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,7 @@ type stubStorage map[string]*model.User
 
 func (s stubStorage) Create(name string) (string, error) {
 	if _, ok := s[name]; ok {
-		return "", apperror.ErrAlreadyExists
+		return "", fmt.Errorf("already exists")
 	}
 	return "2", nil
 }
@@ -22,7 +22,7 @@ func (s stubStorage) Create(name string) (string, error) {
 func (s stubStorage) FindById(id string) (*model.User, error) {
 	user, ok := s[id]
 	if !ok {
-		return nil, apperror.ErrNotFound
+		return nil, fmt.Errorf("not found")
 	}
 	return user, nil
 }
@@ -41,15 +41,13 @@ func TestGetUser(t *testing.T) {
 		},
 	}
 
-	service := &userService{
-		storage: store,
-	}
+	service := NewService(store)
 
 	cases := []struct {
-		name   string
-		sendID string
-		want   *model.User
-		err    error
+		name    string
+		sendID  string
+		want    *model.User
+		mustErr bool
 	}{
 		{
 			name:   "Get existing user",
@@ -68,20 +66,19 @@ func TestGetUser(t *testing.T) {
 			},
 		},
 		{
-			name:   "Get non-existing user",
-			sendID: "3",
-			want:   nil,
-			err:    apperror.ErrNotFound,
+			name:    "Get non-existing user",
+			sendID:  "3",
+			want:    nil,
+			mustErr: true,
 		},
 	}
 	for _, test := range cases {
 
 		t.Run(test.name, func(t *testing.T) {
 			got, err := service.GetUser(test.sendID)
-			switch test.err {
-			case apperror.ErrNotFound:
-				assert.EqualError(t, err, apperror.ErrNotFound.Error())
-			default:
+			if test.mustErr {
+				assert.Error(t, err)
+			} else {
 				assert.NoError(t, err)
 			}
 			assert.Equal(t, test.want, got)
@@ -99,37 +96,33 @@ func TestCreateUser(t *testing.T) {
 		},
 	}
 
-	service := &userService{
-		storage: store,
-	}
+	service := NewService(store)
 
 	cases := []struct {
 		name     string
 		userName string
 		want     string
-		err      error
+		mustErr  bool
 	}{
 		{
 			name:     "Create new user",
 			userName: "Turkish",
 			want:     "2",
-			err:      nil,
 		},
 		{
 			name:     "User already exists",
 			userName: "Boris",
 			want:     "",
-			err:      apperror.ErrAlreadyExists,
+			mustErr:  true,
 		},
 	}
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := service.CreateUser(test.userName)
-			switch test.err {
-			case apperror.ErrAlreadyExists:
-				assert.EqualError(t, err, apperror.ErrAlreadyExists.Error())
-			default:
+			if test.mustErr {
+				assert.Error(t, err)
+			} else {
 				assert.NoError(t, err)
 			}
 			assert.Equal(t, test.want, got)

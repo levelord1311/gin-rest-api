@@ -9,11 +9,17 @@ type Storage interface {
 	FindById(id string) (*model.User, error)
 }
 
-type userService struct {
+type Service struct {
 	storage Storage
 }
 
-func (u *userService) CreateUser(name string) (string, error) {
+func NewService(storage Storage) *Service {
+	return &Service{
+		storage: storage,
+	}
+}
+
+func (u *Service) CreateUser(name string) (string, error) {
 	createdID, err := u.storage.Create(name)
 	if err != nil {
 		return "", err
@@ -21,7 +27,7 @@ func (u *userService) CreateUser(name string) (string, error) {
 	return createdID, nil
 }
 
-func (u *userService) GetUser(id string) (*model.User, error) {
+func (u *Service) GetUser(id string) (*model.User, error) {
 	user, err := u.storage.FindById(id)
 
 	return user, err
