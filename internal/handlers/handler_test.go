@@ -40,6 +40,8 @@ func (s *mockService) CreateUser(name string) (string, error) {
 }
 
 func TestGetUser(t *testing.T) {
+	t.Parallel()
+
 	gin.SetMode(gin.TestMode)
 
 	store := map[string]model.User{
@@ -92,6 +94,8 @@ func TestGetUser(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 			request, _ := http.NewRequest(http.MethodGet, userPath, nil)
@@ -114,6 +118,8 @@ func TestGetUser(t *testing.T) {
 }
 
 func TestCreateUser(t *testing.T) {
+	t.Parallel()
+
 	gin.SetMode(gin.TestMode)
 
 	store := map[string]model.User{
@@ -162,6 +168,8 @@ func TestCreateUser(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 

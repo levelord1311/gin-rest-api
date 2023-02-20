@@ -1,0 +1,17 @@
+version: v1
+plugins:
+  - plugin: go
+    out: pkg/gin-rest-api
+    opt: paths=import
+
+  - name: go-grpc
+    out: pkg/gin-rest-api
+    opt: paths=import
+    strategy: directory
+
+  - plugin: grpc-gateway
+    out: pkg/gin-rest-api
+    opt:
+      - logtostderr=true
+      - paths=import
+    strategy: directory

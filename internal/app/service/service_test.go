@@ -28,6 +28,8 @@ func (s stubStorage) FindById(id string) (*model.User, error) {
 }
 
 func TestGetUser(t *testing.T) {
+	t.Parallel()
+
 	gin.SetMode(gin.TestMode)
 
 	store := stubStorage{
@@ -75,6 +77,8 @@ func TestGetUser(t *testing.T) {
 	for _, test := range cases {
 
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := service.GetUser(test.sendID)
 			if test.mustErr {
 				assert.Error(t, err)
@@ -87,6 +91,8 @@ func TestGetUser(t *testing.T) {
 }
 
 func TestCreateUser(t *testing.T) {
+	t.Parallel()
+
 	gin.SetMode(gin.TestMode)
 
 	store := stubStorage{
@@ -119,6 +125,8 @@ func TestCreateUser(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := service.CreateUser(test.userName)
 			if test.mustErr {
 				assert.Error(t, err)

@@ -1,0 +1,29 @@
+syntax="proto3";
+
+package levelord1311.gin_rest_api.user_service.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "./user-service;user_service";
+
+service UserService {
+  rpc GetUserById (GetUserByIdRequest) returns (GetUserByIdResponse) {
+        option (google.api.http) = {
+          get: "/v1/user/{id}"
+        };
+  }
+}
+
+message User {
+  uint64 id = 1;
+  string name = 2;
+}
+
+message GetUserByIdRequest {
+  uint64 id = 1; // [(validate.rules).uit64.gt = 0];
+}
+
+message GetUserByIdResponse {
+  // Пользователь
+  User user = 1;
+}
